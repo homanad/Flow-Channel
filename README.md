@@ -61,7 +61,7 @@ Streams concept, types of streams and its properties.
 
     * Ok, let's see what happens!
 
-         <img src="/attachments/flow.gif" width="250"/>
+         <img src="/attachments/flow.gif"/>
 
     * As you can see, it doesn't matter when we start collecting data from the flow, the flow is
       always is recreated and executes the code block inside it, and emitting all the data.
@@ -94,17 +94,17 @@ Streams concept, types of streams and its properties.
 
     * Ok, let's see what happens!
 
-        <img src="/attachments/state_flow.gif" width="250"/>
+        <img src="/attachments/state_flow.gif"/>
 
     * As you can see, depending on when to start observing, the data received by each observer will
       be different. However, a special thing that we need to note, **_StateFlow will not emit 2
       duplicate data consecutively_**, we have lost 1 `l` in `Hello` and two `!` final.
 
-        * Observer 1: it gets all the characters because it starts collecting from the beginning.
+        * Observer 1: it gets all the letters because it starts collecting from the beginning.
         * Observer 2: StateFlow emits each character in turn every 0.2s, ie after 1.4s there will be
-          8 characters emitted (at "W" since we have an empty item at first position of `chars`),
+          8 letters emitted (at "W" since we have an empty item at first position of `chars`),
           Observer 2 starts listening from 1.5s, so then we will get the last data before, which is
-          the letter "W" and the characters after that.
+          the letter "W" and the letters after that.
         * Observer 3: of course, depending on the time we press the button, it will start
           collecting.
 
@@ -198,27 +198,6 @@ Streams concept, types of streams and its properties.
           channel will not be closed until all the data in the buffer is emitted -> buffer is empty.
     * `ReceiveChannel.cancel()`: Used to stop emitting all data inside the buffer, and clear
       undelivered data (clean buffer).
-* Difference between `SendChannel.close()` and `ReceiveChannel.cancel()`:
-
-| SendChannel.close()                                                                          | ReceiveChannel.cancel()                                    |
-|----------------------------------------------------------------------------------------------|------------------------------------------------------------|
-| Pending items inside the buffer will not be deleted                                          | Pending items inside the buffer will bedeleted             |
-| ReceiveChannel will still receive data if there are still items in the buffer                | Receive will nolonger receive any items                    |
-| ReceiveChannel.isClosedForReceive will not be true if there are still items inside in buffer | ReceiveChannel.isClosedForReceive will immediately be true |
-
-* **_Closed Channel_** và **_Failed Channel_**:
-    * The `close()` method inside SendChannel can throw an exception, if we pass an exception, it
-      will be treated as a `FailedChannel`
-    * Closed channel:
-
-        * Call `SendChannel.close()` without passing exception.
-        * When trying to call `send()` -> ClosedSendChannelException will be thrown.
-        * When calling `tryReceive()` từ `ReceiveChannel`, `isClosed` return true
-        * When calling `receive()`, it throws `ClosedReceiveChannelException`
-    * Failed Channel:
-
-        * Call `SendChannel.close()` with passing exception.
-        * When calling `send()`, it throws that exception.
 
 ### Channel types
 
@@ -246,7 +225,7 @@ Streams concept, types of streams and its properties.
 
     * Ok, let's see what happens!
 
-        <img src="/attachments/channel_rendezvous.gif" width="250"/>
+        <img src="/attachments/channel_rendezvous.gif"/>
 
         * As you can see, since I use `trySend()`, and RENDEZVOUS has no buffer, so the previously
           emitted data will definitely be lost.
@@ -276,10 +255,10 @@ Streams concept, types of streams and its properties.
 
     * Ok, let's see what happens!
 
-        <img src="/attachments/channel_buffered.gif" width="250"/>
+        <img src="/attachments/channel_buffered.gif"/>
 
         * As you can see, even if I start collecting it after a few seconds, you still see a bunch
-          of previous characters being emitted at the same time, then continue to collect each
+          of previous letters being emitted at the same time, then continue to collect each
           subsequent character.
         * That's the nature of the buffer, in this case it can store up to 64 letters, and almost
           infinite for **_UNLIMITED channel_**, so I'll skip the example for UNLIMITED channel.
@@ -340,6 +319,31 @@ Streams concept, types of streams and its properties.
               will suspend and wait until I press `button4` (**_Custom capacity 2_**), after data
               inside Channel has been received, `send()` will continue to run,
               then `customizedCapacityChannel2` will continue to emit data -> consecutive series.
+
+### Difference between SendChannel.close() and ReceiveChannel.cancel():
+
+| SendChannel.close()                                                                          | ReceiveChannel.cancel()                                    |
+|----------------------------------------------------------------------------------------------|------------------------------------------------------------|
+| Pending items inside the buffer will not be deleted                                          | Pending items inside the buffer will be deleted            |
+| ReceiveChannel will still receive data if there are still items in the buffer                | Receive will no longer receive any items                   |
+| ReceiveChannel.isClosedForReceive will not be true if there are still items inside in buffer | ReceiveChannel.isClosedForReceive will immediately be true |
+
+* **_Closed Channel_** và **_Failed Channel_**:
+    * The `close()` method inside SendChannel can throw an exception, if we pass an exception, it
+      will be treated as a `FailedChannel`
+    * Closed channel:
+
+        * Call `SendChannel.close()` without passing exception.
+        * When trying to call `send()` -> ClosedSendChannelException will be thrown.
+        * When calling `tryReceive()` from `ReceiveChannel`, `isClosed` return true
+        * When calling `receive()`, it throws `ClosedReceiveChannelException`
+    * Failed Channel:
+
+        * Call `SendChannel.close()` with passing exception.
+        * When calling `send()`, it throws that exception.
+
+* There are some examples for closed and failed channels in my source, so please try it out to see
+  what happens!
 
 ### Consume values
 
