@@ -1,4 +1,19 @@
-# Kotlin flows
+# Kotlin flows & channels
+
+- [Streams](#streams-hot---cold-streams)
+    - [Cold streams](#cold-streams)
+    - [Hot streams](#hot-streams)
+- [Flow](#flow)
+- [StateFlow](#stateflow)
+- [SharedFlow](#sharedflow)
+- [Channel](#channel)
+    - [Channel types](#channel-types)
+    - [Difference between SendChannel.close() and ReceiveChannel.cancel()](#difference-between-sendchannelclose-and-receivechannelcancel)
+    - [Consume values](#consume-values)
+- [Operators](#operators)
+    - [Immediate operators](#immediate-operators)
+    - [Terminal operators](#terminal-operators)
+- [Conclusion](#conclusion)
 
 ## Streams/ Hot - Cold streams
 
@@ -14,7 +29,6 @@ Streams concept, types of streams and its properties.
     * How many receivers at the same time can get the data: unicast or multicast mechanism.
     * Laziness: when the stream starts to emit values. Can it starts eagerly or it will start when
       we request for it.
-* From above characteristics, we can determine which is Hot or Cold stream.
 
 #### Cold streams
 
@@ -43,26 +57,23 @@ Streams concept, types of streams and its properties.
 * **_Flow is a cold stream_**, which means it only emits data when there is a subscriber.
 * As the name, flow is like a flow, it only flows, not stores.
 * Always execute the same code block when a subscriber starts listening (cold stream concept)
-
 * Example:
+
     * This is my ViewModel with a flow:
 
-        <img src="/attachments/flow_viewmodel.png" />
-
+      <img src="/attachments/flow_viewmodel.png" />
     * And this my activity code:
 
-        <img src="/attachments/flow_activity1.png" />
+      <img src="/attachments/flow_activity1.png" />
         <br/>
         <img src="/attachments/flow_activity2.png" />
 
         * I will start Observer 1 right after my activity is created;
         * And after delaying 1s, I will start Observer 2;
         * And then, when I click **_Start observer 3_** button, it will start Observer 3.
-
     * Ok, let's see what happens!
 
-         <img src="/attachments/flow.gif"/>
-
+      <img src="/attachments/flow.gif"/>
     * As you can see, it doesn't matter when we start collecting data from the flow, the flow is
       always is recreated and executes the code block inside it, and emitting all the data.
 
@@ -72,16 +83,16 @@ Streams concept, types of streams and its properties.
   subscriber.
 * When a subscriber starts collecting StateFlow, it receives the last data and subsequent data.
 * StateFlow is quite similar to LiveData, the differences:
+
     * Always have initial data (non-null)
     * LiveData automatically stops emitting data when subscriber is no longer active (`onPause` and
       after that), StateFlow can't be automatic (refer to `Lifecycle.repeatOnLifeCycle`)
 * Turn a cold stream (Flow) into a hot stream (StateFlow) using `stateIn` operator.
-
 * Example:
+
     * This is my ViewModel with a flow:
 
-        <img src="/attachments/state_flow_viewmodel.png" />
-
+      <img src="/attachments/state_flow_viewmodel.png" />
     * And this my activity code:
 
       <img src="/attachments/state_flow_activity1.png" />
@@ -91,11 +102,9 @@ Streams concept, types of streams and its properties.
         * I will start Observer 1 right after my activity is created;
         * And after delaying 1,5s, I will start Observer 2;
         * And then, when I click **_Start observer 3_** button, it will start Observer 3.
-
     * Ok, let's see what happens!
 
-        <img src="/attachments/state_flow.gif"/>
-
+      <img src="/attachments/state_flow.gif"/>
     * As you can see, depending on when to start observing, the data received by each observer will
       be different. However, a special thing that we need to note, **_StateFlow will not emit 2
       duplicate data consecutively_**, we have lost 1 `l` in `Hello` and two `!` final.
@@ -119,23 +128,21 @@ Streams concept, types of streams and its properties.
     * `onBufferOverflow`: config an emit action if the buffer is full, by default emit will be
       suspended until the buffer is available (SUSPEND), there are also DROP_OLDEST and DROP_LATEST.
 * Turn a cold stream (Flow) into a hot stream (SharedFlow) using `shareIn` operator.
-
 * Example:
+
     * This is my view model:
 
-        <img src="/attachments/shared_flow_viewmodel.png" />
-
+      <img src="/attachments/shared_flow_viewmodel.png" />
     * And this is my activity code:
 
       <img src="/attachments/shared_flow_activity1.png" />
       <br/>
       <img src="/attachments/shared_flow_activity2.png" />
-
     * SharedFlow will emit one letter every 0.2s, Observer 1 will be started after 1.3s, Observer 2
       will be started after 3s, and Observer 3 will be started when I click `buttonStartObserver3`
       . So, let's see what happens!
 
-        <img src="/attachments/shared_flow.gif"/>
+      <img src="/attachments/shared_flow.gif"/>
 
         * As you can see,
             * Observer 1: after 1.3s, there are 7 emitted letters, it means when we start
@@ -208,24 +215,22 @@ Streams concept, types of streams and its properties.
   is 0, i.e capacity will be 0. We can say this channel doesn't exist buffer, which means items are
   only sent and received when the sender and receiver are met.
 * Technically:
+
     * `send()` functions will be suspended until receiver appears.
     * `receive()` functions will be suspended until sender calls `send()`.
-
 * Example:
+
     * This is my view model:
 
-        <img src="/attachments/channel_rendezvous_viewmodel.png" />
-
+      <img src="/attachments/channel_rendezvous_viewmodel.png" />
     * And this is my activity code:
 
-        <img src="/attachments/channel_rendezvous_activity.png" />
-
+      <img src="/attachments/channel_rendezvous_activity.png" />
     * `rendezvousChannel` will emit a letter every 0.2s (I used `trySend()`), and we will start
       collecting that data when `button1` (**_Rendezvous channel_**) is clicked.
-
     * Ok, let's see what happens!
 
-        <img src="/attachments/channel_rendezvous.gif"/>
+      <img src="/attachments/channel_rendezvous.gif"/>
 
         * As you can see, since I use `trySend()`, and RENDEZVOUS has no buffer, so the previously
           emitted data will definitely be lost.
@@ -244,18 +249,15 @@ Streams concept, types of streams and its properties.
 * Example:
     * This is my view model:
 
-        <img src="/attachments/channel_rendezvous_viewmodel.png" />
-
+      <img src="/attachments/channel_rendezvous_viewmodel.png" />
     * And this is activity code:
 
-        <img src="/attachments/channel_rendezvous_activity.png" />
-
+      <img src="/attachments/channel_rendezvous_activity.png" />
     * `bufferedChannel` will emit a letter every 0.2s (I used `trySend()`), and we will start
       collecting that data when `button2` (**_Buffered channel_**) is clicked.
-
     * Ok, let's see what happens!
 
-        <img src="/attachments/channel_buffered.gif"/>
+      <img src="/attachments/channel_buffered.gif"/>
 
         * As you can see, even if I start collecting it after a few seconds, you still see a bunch
           of previous letters being emitted at the same time, then continue to collect each
@@ -279,9 +281,9 @@ Streams concept, types of streams and its properties.
   hasn't yet received by any receiver (`DROP_OLDEST`). If it has only one item, and if that item
   received, buffer will be empty.
 * Technically:
+
     * `send()` will never be suspended.
     * `receive()` will be suspended if buffer is empty.
-
 * Conflated Channel is somewhat similar to **_Rendezvous channel and trySend()**_ (data not received
   will be lost), but also like Unlimited channel where send() never suspends, but it only holds one
   last item, try to pull my code and change it to Conflated channel for better understanding.
@@ -290,27 +292,25 @@ Streams concept, types of streams and its properties.
 
 * It is similar to BUFFERED channel, the only difference is that we pass an optional capacity value
   into the constructor.
-
 * In this section, I will try it in two case: with send() and trySend()
+
     * This is my view model with two custom capacity channels:
 
-        <img src="/attachments/channel_custom_capacity_viewmodel.png" />
-
+      <img src="/attachments/channel_custom_capacity_viewmodel.png" />
     * And this is my activity code:
 
-        <img src="/attachments/channel_custom_capacity_activity.png" />
-
+      <img src="/attachments/channel_custom_capacity_activity.png" />
     * `customizedCapacityChannel1` will `trySend()` and `customizedCapacityChannel2` will `send()`
       each character every 0.2s, and we start collecting them for `button3` and `button4`
       respectively, let's see what happens for each channel:
 
-        <img src="/attachments/channel_custom_capacity.gif" />
+      <img src="/attachments/channel_custom_capacity.gif" />
 
         * To explain about `chars`, it is a string and I use `split` function, so there will always
           be an empty word at the beginning and end of this list.
           `private val chars = "Hello World! These are Channels example!!!".split("")`
-
         * As you can see:
+
             * `customizedCapacityChannel1`: I use `trySend()`, so after buffer is full (we have 5
               letters -> "Hell" and the first one is empty), then I press `button3` (
               **_Custom capacity 1_**), we will immediately get "Hell" from Channel and items are
@@ -323,12 +323,13 @@ Streams concept, types of streams and its properties.
 ### Difference between SendChannel.close() and ReceiveChannel.cancel():
 
 | SendChannel.close()                                                                          | ReceiveChannel.cancel()                                    |
-|----------------------------------------------------------------------------------------------|------------------------------------------------------------|
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | Pending items inside the buffer will not be deleted                                          | Pending items inside the buffer will be deleted            |
 | ReceiveChannel will still receive data if there are still items in the buffer                | Receive will no longer receive any items                   |
 | ReceiveChannel.isClosedForReceive will not be true if there are still items inside in buffer | ReceiveChannel.isClosedForReceive will immediately be true |
 
 * **_Closed Channel_** và **_Failed Channel_**:
+
     * The `close()` method inside SendChannel can throw an exception, if we pass an exception, it
       will be treated as a `FailedChannel`
     * Closed channel:
@@ -341,9 +342,8 @@ Streams concept, types of streams and its properties.
 
         * Call `SendChannel.close()` with passing exception.
         * When calling `send()`, it throws that exception.
-
-* There are some examples for closed and failed channels in my source, so please try it out to see
-  what happens!
+* There are some examples for closed and failed channels in my source code, so please try it out to
+  see what happens!
 
 ### Consume values
 
@@ -352,7 +352,7 @@ Streams concept, types of streams and its properties.
   we can get all values from `Channel` with just one `terminal operator` (`consumeAsFlow()`
   , `consumeEach()`,...)
 
-## Flow operators
+## Operators
 
 ### Immediate operators
 
