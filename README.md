@@ -249,10 +249,10 @@ Streams concept, types of streams and its properties.
 * Example:
     * This is my view model:
 
-      <img src="/attachments/channel_rendezvous_viewmodel.png" />
+      <img src="/attachments/channel_buffered_viewmodel.png" />
     * And this is activity code:
 
-      <img src="/attachments/channel_rendezvous_activity.png" />
+      <img src="/attachments/channel_buffered_activity.png" />
     * `bufferedChannel` will emit a letter every 0.2s (I used `trySend()`), and we will start
       collecting that data when `button2` (**_Buffered channel_**) is clicked.
     * Ok, let's see what happens!
